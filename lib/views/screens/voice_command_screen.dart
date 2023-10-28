@@ -16,7 +16,9 @@ class VoiceCommandScreen extends StatefulWidget {
 
 class _VoiceCommandScreenState extends State<VoiceCommandScreen> {
   bool isProcessing = false;
+  bool isResponse = false;
   String helpText = 'Help me find ...';
+  String processing = 'Processing ...';
 
   void toggleProcessing() {
     setState(() {
@@ -24,9 +26,15 @@ class _VoiceCommandScreenState extends State<VoiceCommandScreen> {
     });
     if (isProcessing = true) {
       // Set a delayed task to change the help text after 2 seconds
-      Future.delayed(const Duration(seconds: 2), () {
+      Future.delayed(const Duration(milliseconds: 1500), () {
         setState(() {
           helpText = 'Help me find an elevator.';
+          Future.delayed(const Duration(milliseconds: 1500), () {
+            setState(() {
+              processing = 'Response';
+              isResponse = true;
+            });
+          });
         });
       });
     }
@@ -47,12 +55,14 @@ class _VoiceCommandScreenState extends State<VoiceCommandScreen> {
           Positioned(
               top: 80,
               right: 1080,
-              child: SvgPicture.asset('assets/leftArrow.svg')),
+              child: GestureDetector(
+                  onTap: () => {Navigator.pop(context)},
+                  child: SvgPicture.asset('assets/leftArrow.svg'))),
           Column(
             children: [
               const CustomAppBar(),
               ScreenTitle(title: 'VOICE COMMAND'),
-              SizedBox(height: 150.h),
+              SizedBox(height: !isResponse ? 150.h : 80.h),
               GestureDetector(
                 onTap: toggleProcessing,
                 child: Container(
@@ -74,7 +84,7 @@ class _VoiceCommandScreenState extends State<VoiceCommandScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: !isProcessing ? 28.h : 53.h),
+              SizedBox(height: !isProcessing || isResponse ? 25.h : 53.h),
               !isProcessing
                   ? Column(
                       children: [
@@ -108,20 +118,56 @@ class _VoiceCommandScreenState extends State<VoiceCommandScreen> {
                   : Column(
                       children: [
                         Text(
-                          'Processing ...',
+                          processing,
                           style: TextStyle(
                               color: const Color(0XFF26685C),
                               fontSize: 40.sp,
                               fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 57.h),
-                        Text(
-                          helpText,
-                          style: TextStyle(
-                              color: const Color(0XFF000000),
-                              fontSize: 22.sp,
-                              fontWeight: FontWeight.w500),
-                        ),
+                        SizedBox(height: !isResponse ? 57.h : 30.h),
+                        !isResponse
+                            ? Text(
+                                helpText,
+                                style: TextStyle(
+                                    color: const Color(0XFF000000),
+                                    fontSize: 22.sp,
+                                    fontWeight: FontWeight.w500),
+                              )
+                            : Container(
+                                height: 354.h,
+                                width: 1784.w,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(4.r),
+                                  ),
+                                  color: const Color(0XFF0F4B65),
+                                  border: Border.all(
+                                    color: const Color(0xFFFFFFFF),
+                                    width: 2.0,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      35, 30, 500, 20),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Sure, I can help you with that. To find the nearest elevator, please follow these directions:\n\n'
+                                        '1. Head straight ahead towards the main corridor.\n'
+                                        '2. Turn right when you reach the corridor.\n'
+                                        '3. Continue down the corridor until you see the elevator doors on your left.\n'
+                                        '4. Take the elevator to your desired floor.\n\n'
+                                        'If you need any further assistance or have more questions, feel free to ask. Safe travels!',
+                                        style: TextStyle(
+                                            color: const Color(0XFFFFFFFF),
+                                            fontSize: 24.sp),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
                       ],
                     ),
               SizedBox(height: 100.h),
